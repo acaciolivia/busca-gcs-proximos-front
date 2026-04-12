@@ -1,0 +1,63 @@
+// =============================================================
+// IPF nos Lares — Tema global (Angular Material + verde escuro)
+// =============================================================
+@use '@angular/material' as mat;
+
+// Inclui o núcleo do Material (tipografia, ripple, etc.)
+@include mat.core();
+
+// ── Paletas de cor ────────────────────────────────────────────
+// Primary: verde escuro
+$ipf-primary: mat.define-palette(mat.$green-palette, 800, 600, 900);
+// Accent: verde claro / âmbar
+$ipf-accent:  mat.define-palette(mat.$light-green-palette, 600, 400, 800);
+// Warn: vermelho
+$ipf-warn:    mat.define-palette(mat.$red-palette, 700);
+
+// ── Tema principal ────────────────────────────────────────────
+$ipf-theme: mat.define-light-theme((
+  color: (
+    primary: $ipf-primary,
+    accent:  $ipf-accent,
+    warn:    $ipf-warn,
+  ),
+  typography: mat.define-typography-config(
+    $font-family: 'Roboto, "Helvetica Neue", sans-serif',
+  ),
+));
+
+// Aplica o tema a todos os componentes Material
+@include mat.all-component-themes($ipf-theme);
+
+// =============================================================
+// Reset e base
+// =============================================================
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: #f1f8e9; // verde bem claro como fundo geral
+}
+
+// Scrollbar customizada em verde
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #81c784; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2e7d32; }
+
+// =============================================================
+// Utilitários
+// =============================================================
+.mt-8  { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mb-8  { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.text-center { text-align: center; }
+.text-muted  { color: rgba(0, 0, 0, .54); font-size: 14px; }
+
+// =============================================================
+// Snackbars globais (injetados no body, fora do componente)
+// =============================================================
+.snack-sucesso .mdc-snackbar__surface { background: #2e7d32 !important; }
+.snack-erro    .mdc-snackbar__surface { background: #c62828 !important; }
+.snack-aviso   .mdc-snackbar__surface { background: #e65100 !important; }

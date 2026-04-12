@@ -1,0 +1,429 @@
+// =============================================================
+// EnderecosComponent — Estilos (tema verde escuro)
+// =============================================================
+
+// ── Variáveis ────────────────────────────────────────────────
+$verde-escuro:  #2e7d32;
+$verde-medio:   #388e3c;
+$verde-claro:   #a5d6a7;
+$verde-fundo:   #f1f8e9;
+$verde-borda:   #c8e6c9;
+$texto-muted:   rgba(0, 0, 0, .5);
+
+// ── Cards compartilhados ─────────────────────────────────────
+.card-secao {
+  margin-bottom: 24px;
+  border-radius: 14px !important;
+  border: 1px solid $verde-borda !important;
+  box-shadow: 0 2px 10px rgba(46, 125, 50, .1) !important;
+  background: #fff !important;
+
+  mat-card-header { padding-bottom: 8px; }
+  mat-card-content { padding-top: 16px; }
+}
+
+.titulo-icone {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: $verde-escuro;
+}
+
+// ── Formulário ───────────────────────────────────────────────
+.form-linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.campo-cep         { flex: 0 0 160px; }
+.campo-numero      { flex: 0 0 110px; }
+.campo-complemento { flex: 1 1 200px; }
+.campo-logradouro  { flex: 2 1 300px; }
+.campo-bairro      { flex: 1 1 200px; }
+.campo-cidade      { flex: 2 1 240px; }
+.campo-estado      { flex: 0 0 110px; }
+
+.form-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid $verde-borda;
+}
+
+.spinner-btn {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+// ── Seção Lista ──────────────────────────────────────────────
+.secao-lista {
+  margin-bottom: 24px;
+}
+
+// ── Barra de pesquisa proeminente ────────────────────────────
+.barra-pesquisa {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 2px solid $verde-escuro;
+  border-radius: 50px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(46, 125, 50, .15);
+  transition: box-shadow .2s;
+
+  &:focus-within {
+    box-shadow: 0 4px 18px rgba(46, 125, 50, .28);
+  }
+}
+
+.pesquisa-icone {
+  color: $verde-escuro;
+  flex-shrink: 0;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.pesquisa-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  font-family: Roboto, sans-serif;
+  color: rgba(0, 0, 0, .8);
+  background: transparent;
+
+  &::placeholder { color: rgba(0, 0, 0, .38); }
+}
+
+.pesquisa-limpar {
+  color: $texto-muted;
+  flex-shrink: 0;
+}
+
+// ── Cabeçalho da lista ───────────────────────────────────────
+.lista-header {
+  margin-bottom: 16px;
+}
+
+.lista-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: $verde-escuro;
+  margin: 0;
+
+  mat-icon { color: $verde-escuro; }
+}
+
+.badge-contagem {
+  background: $verde-escuro;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+// ── Grid de cards ────────────────────────────────────────────
+.enderecos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+// ── Card de endereço ─────────────────────────────────────────
+.endereco-card {
+  background: #fff;
+  border: 1px solid $verde-borda;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, .08);
+  transition: box-shadow .2s, transform .15s;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(46, 125, 50, .18);
+    transform: translateY(-2px);
+  }
+
+  &.card-editando {
+    border-color: $verde-escuro;
+    box-shadow: 0 0 0 2px rgba(46, 125, 50, .35);
+  }
+}
+
+// Topo do card
+.card-topo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 8px;
+  flex-wrap: wrap;
+}
+
+.badge-cep {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: $verde-fundo;
+  color: $verde-escuro;
+  border: 1px solid $verde-borda;
+  border-radius: 20px;
+  padding: 3px 10px 3px 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .3px;
+  flex: 1;
+}
+
+.icone-cep {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.card-acoes {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+
+  .btn-editar { color: $verde-escuro; }
+}
+
+// Divisor verde
+.card-divisor {
+  height: 3px;
+  background: linear-gradient(90deg, $verde-escuro, $verde-claro);
+  margin: 0 0 4px;
+}
+
+// Corpo do card
+.card-corpo {
+  padding: 10px 14px 14px;
+}
+
+.card-logradouro {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, .8);
+  line-height: 1.4;
+}
+
+.card-complemento {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: $texto-muted;
+}
+
+.card-localidade {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: $texto-muted;
+
+  .icone-localidade {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: $verde-medio;
+  }
+}
+
+.card-sem-coords {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: rgba(0, 0, 0, .35);
+
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
+.badge-uf {
+  display: inline-block;
+  background: #e8f5e9;
+  color: $verde-escuro;
+  border-radius: 8px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+// ── Sem resultados ───────────────────────────────────────────
+.sem-resultados {
+  text-align: center;
+  padding: 48px 16px;
+  color: $texto-muted;
+  background: #fff;
+  border: 1px dashed $verde-borda;
+  border-radius: 12px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    color: $verde-claro;
+    display: block;
+    margin: 0 auto 12px;
+  }
+
+  p {
+    margin: 0 0 16px;
+    font-size: 14px;
+  }
+}
+
+// ── Loading ──────────────────────────────────────────────────
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 0;
+}
+
+// ── Seção Proximidade ────────────────────────────────────────
+.proximidade-controles {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.campo-cep-prox {
+  flex: 0 0 190px;
+
+  .mat-mdc-form-field-subscript-wrapper { display: none; }
+}
+
+// Grupo de botões de raio
+.filtro-raio {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: $verde-fundo;
+  border: 1px solid $verde-borda;
+  border-radius: 50px;
+  padding: 4px 8px;
+  height: 56px;
+  box-sizing: border-box;
+}
+
+.filtro-raio-label {
+  font-size: 13px;
+  color: $texto-muted;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.btn-raio-ativo {
+  border-radius: 50px !important;
+  font-size: 13px;
+}
+
+.btn-raio-inativo {
+  border-radius: 50px !important;
+  font-size: 13px;
+  background: transparent !important;
+  color: $verde-escuro !important;
+
+  &:hover { background: $verde-claro !important; }
+}
+
+.btn-buscar-prox {
+  height: 56px;
+  padding: 0 24px;
+  border-radius: 8px;
+}
+
+// ── Info resultado de proximidade ────────────────────────────
+.resultado-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: $texto-muted;
+  font-size: 13px;
+  margin-bottom: 16px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: $verde-escuro;
+  }
+}
+
+// ── Card de proximidade ──────────────────────────────────────
+.card-proximo .card-topo {
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.badge-posicao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: $verde-fundo;
+  color: $verde-escuro;
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid $verde-borda;
+  flex-shrink: 0;
+
+  &.posicao-top {
+    background: $verde-escuro;
+    color: #fff;
+    border-color: $verde-escuro;
+  }
+}
+
+.badge-distancia {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: $verde-escuro;
+  color: #fff;
+  border-radius: 20px;
+  padding: 3px 10px 3px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: auto;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+// ── Responsividade ───────────────────────────────────────────
+@media (max-width: 768px) {
+  .campo-cep, .campo-numero, .campo-complemento,
+  .campo-logradouro, .campo-bairro, .campo-cidade, .campo-estado {
+    flex: 1 1 100%;
+  }
+
+  .form-acoes { justify-content: stretch; button { flex: 1; } }
+  .enderecos-grid { grid-template-columns: 1fr; }
+  .proximidade-controles { flex-direction: column; }
+  .campo-cep-prox { flex: 1 1 100%; }
+  .filtro-raio { width: 100%; justify-content: center; }
+  .btn-buscar-prox { width: 100%; }
+}
