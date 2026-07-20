@@ -1,7 +1,9 @@
+import { Membro } from './membro.model';
+
 /**
  * Modelo de Endereço.
  * Convenção de variáveis (Hungarian notation):
- *   n = number, s = string, d = double/number decimal, dt = Date/string ISO
+ *   n = number, s = string, d = double/number decimal, l = list, dt = Date/string ISO
  */
 export interface Endereco {
   nId?:            number;
@@ -14,6 +16,7 @@ export interface Endereco {
   sEstado?:        string;
   dLatitude?:      number;
   dLongitude?:     number;
+  lMembros?:       Membro[];
   dtCriacao?:      string;
   dtAtualizacao?:  string;
 }

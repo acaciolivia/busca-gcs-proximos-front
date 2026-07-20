@@ -2,20 +2,22 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { Subject, of } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { Endereco } from '../../models/endereco.model';
-import { EnderecoProximo } from '../../models/endereco-proximo.model';
 import { EnderecoService } from '../../services/endereco.service';
 import { Membro, FUNCOES_IGREJA } from '../../models/membro.model';
 import { MembroService } from '../../services/membro.service';
+import { Grupo } from '../../models/grupo.model';
+import { GrupoService } from '../../services/grupo.service';
+import { normalizarTexto, gerarLinkContato } from '../../shared/texto.util';
 
 @Component({
-  selector: 'app-enderecos',
-  templateUrl: './enderecos.component.html',
-  styleUrls: ['./enderecos.component.scss']
+  selector: 'app-cadastro',
+  templateUrl: './cadastro.component.html',
+  styleUrls: ['./cadastro.component.scss']
 })
-export class EnderecosComponent implements OnInit {
+export class CadastroComponent implements OnInit {
 
   // =========================================================
   // Formulário unificado (Endereço + Membro)
@@ -28,45 +30,43 @@ export class EnderecosComponent implements OnInit {
   bSalvando    = false;
   readonly lFuncoes = FUNCOES_IGREJA;
 
+  /** Grupos disponíveis para vincular ao membro. */
+  lGrupos: Grupo[] = [];
+
   // =========================================================
   // Lista de endereços (cards)
   // =========================================================
-  lEnderecos: Endereco[]         = [];
+  lEnderecos: Endereco[]          = [];
   lEnderecosFiltrados: Endereco[] = [];
   sBuscaTexto = '';
   bCarregando = false;
 
   private oBuscaSubject = new Subject<string>();
 
-  // =========================================================
-  // Busca por proximidade
-  // =========================================================
-  sCepProximidade      = '';
-  lTodosProximos: EnderecoProximo[]      = [];
-  lEnderecosProximos: EnderecoProximo[]  = [];
-  bBuscandoProximos    = false;
-  bProximosCarregados  = false;
-  nRaioFiltroKm        = 0;
-
-  get bCepProximidadeInvalido(): boolean {
-    return this.sCepProximidade.replace(/\D/g, '').length < 8;
-  }
-
   constructor(
     private oFb: FormBuilder,
     private oEnderecoService: EnderecoService,
     private oMembroService: MembroService,
+    private oGrupoService: GrupoService,
     private oSnackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
     this.inicializarFormulario();
     this.carregarEnderecos();
+    this.carregarGrupos();
 
     this.oBuscaSubject.pipe(
       debounceTime(250),
       distinctUntilChanged()
     ).subscribe(sTexto => this.aplicarFiltro(sTexto));
+  }
+
+  carregarGrupos(): void {
+    this.oGrupoService.listarTodos().subscribe({
+      next: l => this.lGrupos = l,
+      error: () => { /* silencioso — sem grupos cadastrados é OK */ }
+    });
   }
 
   // =========================================================
@@ -75,18 +75,20 @@ export class EnderecosComponent implements OnInit {
 
   private inicializarFormulario(): void {
     this.fEndereco = this.oFb.group({
-      // Campos de endereço
-      sCep:         ['', [Validators.required, Validators.pattern(/^\d{5}-?\d{3}$/)]],
-      sNumero:      [''],
-      sComplemento: [''],
-      sLogradouro:  [''],
-      sBairro:      [''],
-      sCidade:      [''],
-      sEstado:      [''],
-      // Campos do membro
+      sCep:            ['', [Validators.required, Validators.pattern(/^\d{5}-?\d{3}$/)]],
+      sNumero:         [''],
+      sComplemento:    [''],
+      sLogradouro:     [''],
+      sBairro:         [''],
+      sCidade:         [''],
+      sEstado:         [''],
       sNomeMembro:     ['', [Validators.required, Validators.maxLength(150)]],
       sTelefoneMembro: ['', Validators.maxLength(20)],
-      sFuncaoMembro:   ['Membro', Validators.required]
+      sFuncaoMembro:   ['Membro', Validators.required],
+      bWhatsapp:       [false],
+      bAceitaContato:  [false],
+      bDesigrejado:    [false],
+      nGrupoId:        [null]
     });
   }
 
@@ -147,13 +149,16 @@ export class EnderecosComponent implements OnInit {
     };
 
     const oPayloadMembro: Partial<Membro> = {
-      sNome:     oValores.sNomeMembro,
-      sTelefone: oValores.sTelefoneMembro,
-      sFuncao:   oValores.sFuncaoMembro || 'Membro'
+      sNome:           oValores.sNomeMembro,
+      sTelefone:       oValores.sTelefoneMembro,
+      sFuncao:         oValores.sFuncaoMembro || 'Membro',
+      bWhatsapp:       !!oValores.bWhatsapp,
+      bAceitaContato:  !!oValores.bAceitaContato,
+      bDesigrejado:    !!oValores.bDesigrejado,
+      nGrupoId:        oValores.nGrupoId || undefined
     };
 
     if (this.bModoEdicao && this.nIdEdicao !== null) {
-      // Atualiza endereço e depois o membro
       this.oEnderecoService.atualizar(this.nIdEdicao, oPayloadEndereco).pipe(
         switchMap((oEndSalvo: Endereco) => {
           const oMembroPay = { ...oPayloadMembro, nEnderecoId: oEndSalvo.nId };
@@ -175,7 +180,6 @@ export class EnderecosComponent implements OnInit {
         }
       });
     } else {
-      // Cria endereço e depois o membro vinculado
       this.oEnderecoService.criar(oPayloadEndereco).pipe(
         switchMap((oEndCriado: Endereco) => {
           const oMembroPay = { ...oPayloadMembro, nEnderecoId: oEndCriado.nId };
@@ -199,7 +203,6 @@ export class EnderecosComponent implements OnInit {
     this.bModoEdicao = true;
     this.nIdEdicao   = oEndereco.nId ?? null;
 
-    // Preenche campos do endereço
     this.fEndereco.patchValue({
       sCep:         oEndereco.sCep         ?? '',
       sNumero:      oEndereco.sNumero      ?? '',
@@ -210,21 +213,24 @@ export class EnderecosComponent implements OnInit {
       sEstado:      oEndereco.sEstado      ?? ''
     });
 
-    // Preenche campos do membro (primeiro vinculado)
     const oMembro = oEndereco.lMembros?.[0];
     if (oMembro) {
       this.nIdMembroEdicao = oMembro.nId ?? null;
       this.fEndereco.patchValue({
         sNomeMembro:     oMembro.sNome     ?? '',
         sTelefoneMembro: oMembro.sTelefone ?? '',
-        sFuncaoMembro:   oMembro.sFuncao   ?? 'Membro'
+        sFuncaoMembro:   oMembro.sFuncao   ?? 'Membro',
+        bWhatsapp:       !!oMembro.bWhatsapp,
+        bAceitaContato:  !!oMembro.bAceitaContato,
+        bDesigrejado:    !!oMembro.bDesigrejado,
+        nGrupoId:        oMembro.nGrupoId ?? null
       });
     } else {
       this.nIdMembroEdicao = null;
       this.fEndereco.patchValue({
-        sNomeMembro:     '',
-        sTelefoneMembro: '',
-        sFuncaoMembro:   'Membro'
+        sNomeMembro: '', sTelefoneMembro: '', sFuncaoMembro: 'Membro',
+        bWhatsapp: false, bAceitaContato: false, bDesigrejado: false,
+        nGrupoId: null
       });
     }
 
@@ -232,7 +238,7 @@ export class EnderecosComponent implements OnInit {
   }
 
   excluirEndereco(nId: number | undefined): void {
-    if (!nId || !confirm('Deseja realmente excluir este endereço?')) return;
+    if (!nId || !confirm('Deseja realmente excluir este endereço? Os membros vinculados também serão removidos.')) return;
 
     this.oEnderecoService.excluir(nId).subscribe({
       next: () => {
@@ -240,31 +246,38 @@ export class EnderecosComponent implements OnInit {
         this.carregarEnderecos();
         if (this.nIdEdicao === nId) this.resetarFormulario();
       },
-      error: () => this.mostrarMensagem('Erro ao excluir endereço.', 'erro')
+      error: (oErro: { error: string }) =>
+        this.mostrarMensagem(oErro.error || 'Erro ao excluir endereço.', 'erro')
     });
   }
 
   cancelarEdicao(): void { this.resetarFormulario(); }
 
   private resetarFormulario(): void {
-    this.fEndereco.reset({ sFuncaoMembro: 'Membro' });
-    this.bModoEdicao      = false;
-    this.nIdEdicao        = null;
-    this.nIdMembroEdicao  = null;
-    this.bSalvando        = false;
+    this.fEndereco.reset({
+      sFuncaoMembro: 'Membro',
+      bWhatsapp: false,
+      bAceitaContato: false,
+      bDesigrejado: false,
+      nGrupoId: null
+    });
+    this.bModoEdicao     = false;
+    this.nIdEdicao       = null;
+    this.nIdMembroEdicao = null;
+    this.bSalvando       = false;
   }
 
   // =========================================================
-  // Lista de endereços (cards)
+  // Lista de endereços
   // =========================================================
 
   carregarEnderecos(): void {
     this.bCarregando = true;
     this.oEnderecoService.listarTodos().subscribe({
       next: (lEnderecos: Endereco[]) => {
-        this.lEnderecos         = lEnderecos;
+        this.lEnderecos = lEnderecos;
         this.aplicarFiltro(this.sBuscaTexto);
-        this.bCarregando        = false;
+        this.bCarregando = false;
       },
       error: () => {
         this.mostrarMensagem('Erro ao carregar endereços.', 'erro');
@@ -278,81 +291,24 @@ export class EnderecosComponent implements OnInit {
     this.oBuscaSubject.next(this.sBuscaTexto);
   }
 
+  limparFiltro(): void {
+    this.sBuscaTexto = '';
+    this.aplicarFiltro('');
+  }
+
   aplicarFiltro(sTexto: string): void {
-    if (!sTexto.trim()) {
+    const sTermo = normalizarTexto(sTexto);
+    if (!sTermo) {
       this.lEnderecosFiltrados = [...this.lEnderecos];
       return;
     }
-    const sFiltro = sTexto.trim().toLowerCase();
-    this.lEnderecosFiltrados = this.lEnderecos.filter(oE =>
-      [oE.sCep, oE.sLogradouro, oE.sBairro, oE.sCidade, oE.sEstado]
-        .some(sValor => sValor?.toLowerCase().includes(sFiltro))
-      || oE.lMembros?.some(oM => oM.sNome?.toLowerCase().includes(sFiltro))
-    );
-  }
-
-  // =========================================================
-  // Busca por proximidade
-  // =========================================================
-
-  onCepProximidadeInput(oEvent: Event): void {
-    const oInput = oEvent.target as HTMLInputElement;
-    let sValor   = oInput.value.replace(/\D/g, '');
-    if (sValor.length > 5) {
-      sValor = sValor.substring(0, 5) + '-' + sValor.substring(5, 8);
-    }
-    this.sCepProximidade = sValor;
-  }
-
-  selecionarRaio(nRaio: number): void {
-    this.nRaioFiltroKm = nRaio;
-    if (this.bProximosCarregados) {
-      this.aplicarFiltroProximos();
-    }
-  }
-
-  buscarProximos(): void {
-    const sCepLimpo = this.sCepProximidade.replace(/\D/g, '');
-    if (sCepLimpo.length !== 8) {
-      this.mostrarMensagem('Digite um CEP válido para buscar os endereços próximos.', 'aviso');
-      return;
-    }
-
-    this.bBuscandoProximos   = true;
-    this.bProximosCarregados = false;
-    this.lTodosProximos      = [];
-    this.lEnderecosProximos  = [];
-
-    this.oEnderecoService.buscarProximos(this.sCepProximidade).subscribe({
-      next: (lProximos: EnderecoProximo[]) => {
-        this.lTodosProximos      = lProximos;
-        this.bBuscandoProximos   = false;
-        this.bProximosCarregados = true;
-        this.aplicarFiltroProximos();
-
-        if (lProximos.length === 0) {
-          this.mostrarMensagem('Nenhum endereço com coordenadas cadastrado.', 'aviso');
-        }
-      },
-      error: (oErro: { error: string }) => {
-        this.mostrarMensagem(oErro.error || 'Erro ao buscar endereços próximos.', 'erro');
-        this.bBuscandoProximos = false;
-      }
+    // Filtra ignorando acentos e maiúsculas/minúsculas.
+    this.lEnderecosFiltrados = this.lEnderecos.filter(oE => {
+      const lCampos = [oE.sCep, oE.sLogradouro, oE.sBairro, oE.sCidade, oE.sEstado]
+        .map(s => normalizarTexto(s));
+      if (lCampos.some(s => s.includes(sTermo))) return true;
+      return oE.lMembros?.some(oM => normalizarTexto(oM.sNome).includes(sTermo)) ?? false;
     });
-  }
-
-  private aplicarFiltroProximos(): void {
-    if (this.nRaioFiltroKm === 0) {
-      this.lEnderecosProximos = [...this.lTodosProximos];
-    } else {
-      this.lEnderecosProximos = this.lTodosProximos.filter(
-        oE => oE.dDistanciaKm <= this.nRaioFiltroKm
-      );
-    }
-
-    if (this.bProximosCarregados && this.nRaioFiltroKm > 0 && this.lEnderecosProximos.length === 0) {
-      this.mostrarMensagem(`Nenhum endereço encontrado em até ${this.nRaioFiltroKm} km.`, 'aviso');
-    }
   }
 
   // =========================================================
@@ -361,14 +317,15 @@ export class EnderecosComponent implements OnInit {
 
   formatarTelefone(sTelefone?: string): string {
     if (!sTelefone) return '—';
-    const sDigitos = sTelefone.replace(/\D/g, '');
-    if (sDigitos.length === 11) {
-      return `(${sDigitos.slice(0,2)}) ${sDigitos.slice(2,7)}-${sDigitos.slice(7)}`;
-    }
-    if (sDigitos.length === 10) {
-      return `(${sDigitos.slice(0,2)}) ${sDigitos.slice(2,6)}-${sDigitos.slice(6)}`;
-    }
+    const sD = sTelefone.replace(/\D/g, '');
+    if (sD.length === 11) return `(${sD.slice(0,2)}) ${sD.slice(2,7)}-${sD.slice(7)}`;
+    if (sD.length === 10) return `(${sD.slice(0,2)}) ${sD.slice(2,6)}-${sD.slice(6)}`;
     return sTelefone;
+  }
+
+  /** Retorna link wa.me (WhatsApp) ou tel: dependendo da flag bWhatsapp. */
+  gerarLinkContato(sTelefone?: string, bWhatsapp?: boolean): string {
+    return gerarLinkContato(sTelefone, bWhatsapp ?? false);
   }
 
   private mostrarMensagem(sMensagem: string, sTipo: 'sucesso' | 'erro' | 'aviso'): void {

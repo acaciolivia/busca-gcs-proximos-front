@@ -1,0 +1,76 @@
+$verde-escuro: #2e7d32;
+$verde-fundo:  #f1f8e9;
+$verde-borda:  #c8e6c9;
+$texto-muted:  rgba(0,0,0,.5);
+
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  min-height: 60vh;
+}
+
+.card-login {
+  width: 100%;
+  max-width: 440px;
+  padding: 12px 8px 4px;
+  border-radius: 14px !important;
+  border: 1px solid $verde-borda !important;
+  box-shadow: 0 6px 24px rgba(46,125,50,.15) !important;
+  background: #fff !important;
+}
+
+.login-avatar {
+  background: $verde-fundo;
+  color: $verde-escuro;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid $verde-borda;
+
+  mat-icon { color: $verde-escuro; font-size: 22px; }
+}
+
+.campo-senha {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.acoes-login {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-entrar {
+  min-width: 140px;
+  height: 44px;
+
+  mat-icon { vertical-align: middle; margin-right: 4px; }
+}
+
+.spinner-btn { display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+.aviso-login {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: $texto-muted;
+  font-size: 12px;
+  margin-top: 18px;
+  padding: 10px 12px;
+  background: $verde-fundo;
+  border-left: 3px solid $verde-escuro;
+  border-radius: 4px;
+  line-height: 1.4;
+
+  mat-icon {
+    color: $verde-escuro;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+}

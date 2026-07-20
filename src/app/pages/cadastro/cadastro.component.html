@@ -1,8 +1,8 @@
 <!-- =====================================================
-     IPF nos Lares — Tela principal
+     IPF nos Lares — Cadastro
      ===================================================== -->
 
-<!-- ── Seção 1: Formulário (Endereço + Membro) ────────────── -->
+<!-- ── Formulário (Endereço + Membro) ───────────────────── -->
 <mat-card class="card-secao">
   <mat-card-header>
     <mat-card-title>
@@ -10,7 +10,9 @@
       {{ bModoEdicao ? 'Editar Cadastro' : 'Novo Cadastro' }}
     </mat-card-title>
     <mat-card-subtitle>
-      {{ bModoEdicao ? 'Altere os campos e clique em Atualizar' : 'Informe os dados do membro e o CEP para preenchimento automático do endereço' }}
+      {{ bModoEdicao
+        ? 'Altere os campos e clique em Atualizar'
+        : 'Informe os dados do membro e o CEP para preenchimento automático' }}
     </mat-card-subtitle>
   </mat-card-header>
 
@@ -22,18 +24,21 @@
         <mat-icon>person</mat-icon> Dados do Membro
       </h3>
 
-      <!-- Linha: Nome · Telefone · Função -->
       <div class="form-linha">
         <mat-form-field appearance="outline" class="campo-nome-membro">
           <mat-label>Nome completo *</mat-label>
-          <input matInput formControlName="sNomeMembro" placeholder="Ex: João da Silva" maxlength="150">
+          <input matInput formControlName="sNomeMembro"
+                 placeholder="Ex: João da Silva" maxlength="150">
           <mat-icon matSuffix>person</mat-icon>
-          <mat-error *ngIf="fEndereco.get('sNomeMembro')?.hasError('required')">Nome obrigatório</mat-error>
+          <mat-error *ngIf="fEndereco.get('sNomeMembro')?.hasError('required')">
+            Nome obrigatório
+          </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="campo-telefone-membro">
           <mat-label>Telefone</mat-label>
-          <input matInput formControlName="sTelefoneMembro" placeholder="(00) 00000-0000" maxlength="20">
+          <input matInput formControlName="sTelefoneMembro"
+                 placeholder="(00) 00000-0000" maxlength="20">
           <mat-icon matSuffix>phone</mat-icon>
         </mat-form-field>
 
@@ -45,8 +50,46 @@
             </mat-option>
           </mat-select>
           <mat-icon matSuffix>badge</mat-icon>
-          <mat-error *ngIf="fEndereco.get('sFuncaoMembro')?.hasError('required')">Função obrigatória</mat-error>
+          <mat-error *ngIf="fEndereco.get('sFuncaoMembro')?.hasError('required')">
+            Função obrigatória
+          </mat-error>
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="campo-grupo-membro">
+          <mat-label>Grupo/Célula</mat-label>
+          <mat-select formControlName="nGrupoId">
+            <mat-option [value]="null">— Nenhum —</mat-option>
+            <mat-option *ngFor="let oG of lGrupos" [value]="oG.nId">
+              {{ oG.sNome }} <small *ngIf="oG.sNomeLider">— Líder: {{ oG.sNomeLider }}</small>
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>groups</mat-icon>
+          <mat-hint>Opcional — RN-001: máximo 1 grupo</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Linha de checkboxes: WhatsApp e Consentimento de contato -->
+      <div class="form-linha form-checkboxes">
+        <mat-checkbox formControlName="bWhatsapp" color="primary">
+          <span class="check-label">
+            <mat-icon class="check-icone check-wpp">chat</mat-icon>
+            Este número é WhatsApp
+          </span>
+        </mat-checkbox>
+
+        <mat-checkbox formControlName="bAceitaContato" color="primary">
+          <span class="check-label">
+            <mat-icon class="check-icone">verified_user</mat-icon>
+            A pessoa autorizou ser contactada
+          </span>
+        </mat-checkbox>
+
+        <mat-checkbox formControlName="bDesigrejado" color="warn">
+          <span class="check-label">
+            <mat-icon class="check-icone check-desigrejado">heart_broken</mat-icon>
+            Desigrejado (afastado da igreja)
+          </span>
+        </mat-checkbox>
       </div>
 
       <!-- ── Dados do endereço ───────────────────────── -->
@@ -103,7 +146,8 @@
 
         <mat-form-field appearance="outline" class="campo-estado">
           <mat-label>Estado (UF)</mat-label>
-          <input matInput formControlName="sEstado" maxlength="2" style="text-transform: uppercase">
+          <input matInput formControlName="sEstado" maxlength="2"
+                 style="text-transform: uppercase">
         </mat-form-field>
       </div>
 
@@ -126,7 +170,7 @@
 </mat-card>
 
 
-<!-- ── Seção 2: Endereços Cadastrados (cards) ───────────── -->
+<!-- ── Endereços Cadastrados ─────────────────────────────── -->
 <section class="secao-lista">
 
   <!-- Barra de pesquisa -->
@@ -137,7 +181,7 @@
            placeholder="Pesquisar por nome, CEP, logradouro, bairro, cidade ou estado..."
            [value]="sBuscaTexto"
            (input)="onFiltroInput($event)">
-    <button class="pesquisa-limpar" *ngIf="sBuscaTexto" (click)="sBuscaTexto = ''; aplicarFiltro('')"
+    <button class="pesquisa-limpar" *ngIf="sBuscaTexto" (click)="limparFiltro()"
             mat-icon-button matTooltip="Limpar pesquisa">
       <mat-icon>close</mat-icon>
     </button>
@@ -155,14 +199,14 @@
   <!-- Loading -->
   <div class="loading-container" *ngIf="bCarregando">
     <mat-spinner diameter="48"></mat-spinner>
-    <p class="text-muted mt-8">Carregando...</p>
+    <p class="text-muted">Carregando...</p>
   </div>
 
   <!-- Sem resultados -->
   <div class="sem-resultados" *ngIf="!bCarregando && lEnderecosFiltrados.length === 0">
     <mat-icon>search_off</mat-icon>
     <p>{{ sBuscaTexto ? 'Nenhum resultado para "' + sBuscaTexto + '"' : 'Nenhum cadastro realizado ainda.' }}</p>
-    <button mat-stroked-button color="primary" *ngIf="sBuscaTexto" (click)="sBuscaTexto = ''; aplicarFiltro('')">
+    <button mat-stroked-button color="primary" *ngIf="sBuscaTexto" (click)="limparFiltro()">
       Limpar filtro
     </button>
   </div>
@@ -173,21 +217,18 @@
          *ngFor="let oEndereco of lEnderecosFiltrados"
          [class.card-editando]="oEndereco.nId === nIdEdicao">
 
-      <!-- Topo do card: CEP + ações -->
+      <!-- Topo: CEP + ações -->
       <div class="card-topo">
         <span class="badge-cep">
           <mat-icon class="icone-cep">location_on</mat-icon>
           {{ oEndereco.sCep }}
         </span>
         <div class="card-acoes">
-          <button mat-icon-button
-                  (click)="editarEndereco(oEndereco)"
-                  matTooltip="Editar"
-                  class="btn-editar">
+          <button mat-icon-button (click)="editarEndereco(oEndereco)"
+                  matTooltip="Editar" class="btn-editar">
             <mat-icon>edit</mat-icon>
           </button>
-          <button mat-icon-button
-                  color="warn"
+          <button mat-icon-button color="warn"
                   (click)="excluirEndereco(oEndereco.nId)"
                   matTooltip="Excluir">
             <mat-icon>delete_outline</mat-icon>
@@ -198,22 +239,41 @@
       <!-- Membros vinculados -->
       <div class="card-membros" *ngIf="oEndereco.lMembros && oEndereco.lMembros.length > 0">
         <div class="card-membro-item" *ngFor="let oM of oEndereco.lMembros">
-          <div class="card-membro-avatar">{{ (oM.sNome || '?').charAt(0).toUpperCase() }}</div>
+          <div class="card-membro-avatar"
+               [class.avatar-desigrejado]="oM.bDesigrejado">
+            {{ (oM.sNome || '?').charAt(0).toUpperCase() }}
+          </div>
           <div class="card-membro-dados">
-            <span class="card-membro-nome">{{ oM.sNome }}</span>
+            <span class="card-membro-nome">
+              {{ oM.sNome }}
+              <span class="tag-desigrejado" *ngIf="oM.bDesigrejado"
+                    matTooltip="Membro desigrejado">
+                <mat-icon>heart_broken</mat-icon> Desigrejado
+              </span>
+            </span>
             <span class="card-membro-funcao">{{ oM.sFuncao }}</span>
           </div>
-          <span class="card-membro-telefone" *ngIf="oM.sTelefone">
-            <mat-icon class="icone-tel-card">phone</mat-icon>
+          <a class="card-membro-telefone"
+             *ngIf="oM.sTelefone"
+             [class.tel-whatsapp]="oM.bWhatsapp"
+             [href]="gerarLinkContato(oM.sTelefone, oM.bWhatsapp)"
+             target="_blank" rel="noopener"
+             [matTooltip]="oM.bWhatsapp ? 'Abrir no WhatsApp' : 'Ligar'">
+            <mat-icon class="icone-tel-card">{{ oM.bWhatsapp ? 'chat' : 'phone' }}</mat-icon>
             {{ formatarTelefone(oM.sTelefone) }}
+          </a>
+          <span class="card-membro-sem-contato"
+                *ngIf="oM.bAceitaContato === false"
+                matTooltip="A pessoa não autorizou ser contactada">
+            <mat-icon>do_not_disturb_on</mat-icon>
           </span>
         </div>
       </div>
 
-      <!-- Linha divisória verde -->
+      <!-- Divisor verde -->
       <div class="card-divisor"></div>
 
-      <!-- Corpo do card: dados do endereço -->
+      <!-- Corpo -->
       <div class="card-corpo">
         <p class="card-logradouro">
           {{ oEndereco.sLogradouro || 'Logradouro não informado' }}
@@ -227,7 +287,8 @@
           {{ oEndereco.sBairro ? oEndereco.sBairro + ' · ' : '' }}{{ oEndereco.sCidade || '—' }}
           <span class="badge-uf" *ngIf="oEndereco.sEstado">{{ oEndereco.sEstado }}</span>
         </p>
-        <p class="card-sem-coords" *ngIf="!oEndereco.dLatitude" matTooltip="Sem coordenadas geocodificadas">
+        <p class="card-sem-coords" *ngIf="!oEndereco.dLatitude"
+           matTooltip="Sem coordenadas geocodificadas">
           <mat-icon>location_searching</mat-icon> Sem coordenadas
         </p>
       </div>
@@ -236,125 +297,3 @@
   </div>
 
 </section>
-
-
-<!-- ── Seção 3: Endereços Mais Próximos ─────────────────── -->
-<mat-card class="card-secao">
-  <mat-card-header>
-    <mat-card-title>
-      <mat-icon class="titulo-icone">near_me</mat-icon>
-      Endereços Mais Próximos
-    </mat-card-title>
-    <mat-card-subtitle>
-      Digite seu CEP e escolha um raio de distância
-    </mat-card-subtitle>
-  </mat-card-header>
-
-  <mat-card-content>
-
-    <!-- Controles de busca -->
-    <div class="proximidade-controles">
-
-      <mat-form-field appearance="outline" class="campo-cep-prox">
-        <mat-label>Meu CEP</mat-label>
-        <input matInput [value]="sCepProximidade"
-               (input)="onCepProximidadeInput($event)"
-               placeholder="00000-000" maxlength="9"
-               (keyup.enter)="buscarProximos()">
-        <mat-icon matSuffix>my_location</mat-icon>
-      </mat-form-field>
-
-      <!-- Filtro de raio -->
-      <div class="filtro-raio">
-        <span class="filtro-raio-label">Raio:</span>
-        <button mat-flat-button
-                [color]="nRaioFiltroKm === 0 ? 'primary' : undefined"
-                [class.btn-raio-ativo]="nRaioFiltroKm === 0"
-                [class.btn-raio-inativo]="nRaioFiltroKm !== 0"
-                (click)="selecionarRaio(0)">
-          Todos
-        </button>
-        <button mat-flat-button
-                [color]="nRaioFiltroKm === 5 ? 'primary' : undefined"
-                [class.btn-raio-ativo]="nRaioFiltroKm === 5"
-                [class.btn-raio-inativo]="nRaioFiltroKm !== 5"
-                (click)="selecionarRaio(5)">
-          5 km
-        </button>
-        <button mat-flat-button
-                [color]="nRaioFiltroKm === 10 ? 'primary' : undefined"
-                [class.btn-raio-ativo]="nRaioFiltroKm === 10"
-                [class.btn-raio-inativo]="nRaioFiltroKm !== 10"
-                (click)="selecionarRaio(10)">
-          10 km
-        </button>
-      </div>
-
-      <button mat-raised-button color="primary" class="btn-buscar-prox"
-              (click)="buscarProximos()"
-              [disabled]="bCepProximidadeInvalido || bBuscandoProximos">
-        <mat-spinner diameter="18" *ngIf="bBuscandoProximos" class="spinner-btn"></mat-spinner>
-        <mat-icon *ngIf="!bBuscandoProximos">travel_explore</mat-icon>
-        Buscar
-      </button>
-
-    </div>
-
-    <!-- Loading -->
-    <div class="loading-container" *ngIf="bBuscandoProximos">
-      <mat-spinner diameter="48"></mat-spinner>
-      <p class="text-muted mt-8">Calculando distâncias...</p>
-    </div>
-
-    <!-- Resultados por proximidade (cards) -->
-    <div *ngIf="!bBuscandoProximos && bProximosCarregados">
-
-      <p class="resultado-info" *ngIf="lEnderecosProximos.length > 0">
-        <mat-icon>info_outline</mat-icon>
-        {{ lEnderecosProximos.length }} endereço(s) encontrado(s)
-        <span *ngIf="nRaioFiltroKm > 0"> em até {{ nRaioFiltroKm }} km</span>
-        , ordenados por distância
-      </p>
-
-      <div class="enderecos-grid" *ngIf="lEnderecosProximos.length > 0">
-        <div class="endereco-card card-proximo"
-             *ngFor="let oProximo of lEnderecosProximos; let nIdx = index">
-
-          <div class="card-topo">
-            <span class="badge-posicao" [class.posicao-top]="nIdx < 3">{{ nIdx + 1 }}</span>
-            <span class="badge-cep">
-              <mat-icon class="icone-cep">location_on</mat-icon>
-              {{ oProximo.sCep }}
-            </span>
-            <span class="badge-distancia">
-              <mat-icon>straighten</mat-icon>
-              {{ oProximo.dDistanciaKm | number:'1.1-1' }} km
-            </span>
-          </div>
-
-          <div class="card-divisor"></div>
-
-          <div class="card-corpo">
-            <p class="card-logradouro">
-              {{ oProximo.sLogradouro || '—' }}
-              <span *ngIf="oProximo.sNumero">, {{ oProximo.sNumero }}</span>
-            </p>
-            <p class="card-localidade">
-              <mat-icon class="icone-localidade">place</mat-icon>
-              {{ oProximo.sBairro ? oProximo.sBairro + ' · ' : '' }}{{ oProximo.sCidade || '—' }}
-              <span class="badge-uf" *ngIf="oProximo.sEstado">{{ oProximo.sEstado }}</span>
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      <div class="sem-resultados" *ngIf="lEnderecosProximos.length === 0">
-        <mat-icon>search_off</mat-icon>
-        <p>Nenhum endereço encontrado<span *ngIf="nRaioFiltroKm > 0"> em até {{ nRaioFiltroKm }} km</span>.</p>
-      </div>
-
-    </div>
-
-  </mat-card-content>
-</mat-card>

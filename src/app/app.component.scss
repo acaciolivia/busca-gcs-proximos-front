@@ -39,6 +39,50 @@
 
 .toolbar-spacer { flex: 1; }
 
+// ── Navegação na toolbar ──────────────────────────────────────
+.toolbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 12px;
+
+  a {
+    color: rgba(255, 255, 255, .85) !important;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    height: 40px;
+    text-decoration: none;
+    transition: background .2s;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, .12);
+      color: #fff !important;
+    }
+  }
+
+  .nav-ativo {
+    background: rgba(255, 255, 255, .2) !important;
+    color: #fff !important;
+    font-weight: 700;
+  }
+
+  @media (max-width: 480px) {
+    gap: 0;
+    a { font-size: 0; padding: 0 8px; mat-icon { font-size: 20px; width: 20px; height: 20px; } }
+  }
+}
+
 .toolbar-versao {
   font-size: 11px;
   color: rgba(255, 255, 255, .6);

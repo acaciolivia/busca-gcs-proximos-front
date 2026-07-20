@@ -1,0 +1,211 @@
+<!-- =====================================================
+     IPF nos Lares — Grupos/Células
+     ===================================================== -->
+
+<!-- ── Formulário (Criar / Editar) ────────────────────── -->
+<mat-card class="card-secao">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon class="titulo-icone">{{ bModoEdicao ? 'edit' : 'group_add' }}</mat-icon>
+      {{ bModoEdicao ? 'Editar Grupo/Célula' : 'Novo Grupo/Célula' }}
+    </mat-card-title>
+    <mat-card-subtitle>
+      {{ bModoEdicao ? 'Altere os dados e clique em Atualizar' : 'Cadastre um novo grupo informando nome e líder' }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="fGrupo" (ngSubmit)="onSubmit()" autocomplete="off">
+      <div class="form-linha">
+        <mat-form-field appearance="outline" class="campo-nome-grupo">
+          <mat-label>Nome do Grupo/Célula *</mat-label>
+          <input matInput formControlName="sNome" placeholder="Ex: Célula Centro" maxlength="120">
+          <mat-icon matSuffix>label</mat-icon>
+          <mat-error *ngIf="fGrupo.get('sNome')?.hasError('required')">Nome obrigatório</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="campo-lider">
+          <mat-label>Líder/Responsável *</mat-label>
+          <mat-select formControlName="nLiderId">
+            <mat-option *ngFor="let oM of lMembrosElegiveisLider" [value]="oM.nId">
+              {{ oM.sNome }} <small *ngIf="oM.sFuncao">— {{ oM.sFuncao }}</small>
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>person_pin</mat-icon>
+          <mat-error *ngIf="fGrupo.get('nLiderId')?.hasError('required')">Líder obrigatório</mat-error>
+          <mat-hint>Visitantes e Desigrejados não podem liderar</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <div class="form-linha">
+        <mat-form-field appearance="outline" class="campo-descricao">
+          <mat-label>Descrição (opcional)</mat-label>
+          <textarea matInput formControlName="sDescricao" maxlength="500"
+                    rows="2" placeholder="Local, dia, foco do grupo..."></textarea>
+        </mat-form-field>
+      </div>
+
+      <div class="form-acoes">
+        <button mat-stroked-button type="button" color="warn"
+                *ngIf="bModoEdicao" (click)="cancelar()">
+          <mat-icon>close</mat-icon> Cancelar
+        </button>
+        <button mat-raised-button color="primary" type="submit"
+                [disabled]="fGrupo.invalid || bSalvando">
+          <mat-spinner diameter="18" *ngIf="bSalvando" class="spinner-btn"></mat-spinner>
+          <mat-icon *ngIf="!bSalvando">{{ bModoEdicao ? 'save' : 'add_circle' }}</mat-icon>
+          {{ bModoEdicao ? 'Atualizar' : 'Cadastrar' }}
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<!-- ── Lista de Grupos ────────────────────────────────── -->
+<section class="secao-lista">
+  <div class="lista-header">
+    <h2 class="lista-titulo">
+      <mat-icon>groups</mat-icon>
+      Grupos cadastrados
+      <span class="badge-contagem">{{ lGrupos.length }}</span>
+    </h2>
+  </div>
+
+  <div class="loading-container" *ngIf="bCarregando">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p class="text-muted">Carregando...</p>
+  </div>
+
+  <div class="sem-resultados" *ngIf="!bCarregando && lGrupos.length === 0">
+    <mat-icon>groups_off</mat-icon>
+    <p>Nenhum grupo cadastrado ainda.</p>
+  </div>
+
+  <div class="grupos-grid" *ngIf="!bCarregando && lGrupos.length > 0">
+    <div class="grupo-card"
+         *ngFor="let oG of lGrupos"
+         [class.card-selecionado]="oGrupoSelecionado?.nId === oG.nId">
+
+      <div class="grupo-topo">
+        <h3 class="grupo-nome">
+          <mat-icon class="ico-grupo">group</mat-icon>
+          {{ oG.sNome }}
+        </h3>
+        <div class="grupo-acoes">
+          <button mat-icon-button (click)="editarGrupo(oG)" matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn"
+                  (click)="excluirGrupo(oG.nId)" matTooltip="Excluir">
+            <mat-icon>delete_outline</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <p class="grupo-lider">
+        <mat-icon>person_pin</mat-icon>
+        <strong>Líder:</strong> {{ oG.sNomeLider || '—' }}
+      </p>
+
+      <p class="grupo-descricao" *ngIf="oG.sDescricao">{{ oG.sDescricao }}</p>
+
+      <div class="grupo-rodape">
+        <span class="badge-membros">
+          <mat-icon>person</mat-icon>
+          {{ oG.nQuantidadeMembros || 0 }} membro(s)
+        </span>
+        <button mat-stroked-button color="primary"
+                (click)="selecionarGrupo(oG.nId)">
+          <mat-icon>{{ oGrupoSelecionado?.nId === oG.nId ? 'expand_less' : 'expand_more' }}</mat-icon>
+          {{ oGrupoSelecionado?.nId === oG.nId ? 'Ocultar' : 'Ver membros' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Detalhes do grupo selecionado ──────────────────── -->
+<section class="secao-detalhes" *ngIf="oGrupoSelecionado">
+  <mat-card class="card-secao card-detalhes-grupo">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="titulo-icone">people</mat-icon>
+        Membros de "{{ oGrupoSelecionado.sNome }}"
+      </mat-card-title>
+      <mat-card-subtitle>
+        Líder: <strong>{{ oGrupoSelecionado.sNomeLider }}</strong>
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Adicionar membro -->
+      <div class="add-membro-bar">
+        <mat-form-field appearance="outline" class="campo-add-membro">
+          <mat-label>Adicionar membro ao grupo</mat-label>
+          <mat-select [(value)]="nMembroParaAdicionar">
+            <mat-option *ngFor="let oM of lMembrosDisponiveis" [value]="oM.nId">
+              {{ oM.sNome }} <small *ngIf="oM.sNomeGrupo">— atualmente em {{ oM.sNomeGrupo }}</small>
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>person_add</mat-icon>
+        </mat-form-field>
+        <button mat-raised-button color="primary"
+                (click)="adicionarMembroAoGrupo()"
+                [disabled]="!nMembroParaAdicionar">
+          <mat-icon>add</mat-icon> Adicionar
+        </button>
+      </div>
+
+      <!-- Lista paginada de membros -->
+      <div class="sem-membros" *ngIf="lMembrosDoGrupo.length === 0">
+        <mat-icon>person_off</mat-icon>
+        <p>Nenhum membro vinculado a este grupo ainda.</p>
+      </div>
+
+      <ul class="lista-membros-grupo" *ngIf="lMembrosDoGrupo.length > 0">
+        <li class="membro-item" *ngFor="let oM of lMembrosPagina">
+          <div class="membro-avatar"
+               [class.avatar-visitante]="oM.sFuncao === 'Visitante'"
+               [class.avatar-desigrejado]="oM.bDesigrejado">
+            {{ (oM.sNome || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div class="membro-dados">
+            <span class="membro-nome">
+              {{ oM.sNome }}
+              <span class="tag-desigrejado" *ngIf="oM.bDesigrejado">
+                <mat-icon>heart_broken</mat-icon> Desigrejado
+              </span>
+            </span>
+            <span class="membro-funcao">{{ oM.sFuncao }}</span>
+          </div>
+          <a class="membro-telefone" *ngIf="oM.sTelefone"
+             [class.tel-whatsapp]="oM.bWhatsapp"
+             [href]="gerarLinkContato(oM.sTelefone, oM.bWhatsapp)"
+             target="_blank" rel="noopener"
+             [matTooltip]="oM.bWhatsapp ? 'Abrir no WhatsApp' : 'Ligar'">
+            <mat-icon class="ico-tel">{{ oM.bWhatsapp ? 'chat' : 'phone' }}</mat-icon>
+            {{ formatarTelefone(oM.sTelefone) }}
+          </a>
+          <button mat-icon-button color="warn"
+                  (click)="removerMembroDoGrupo(oM.nId)"
+                  matTooltip="Remover do grupo">
+            <mat-icon>person_remove</mat-icon>
+          </button>
+        </li>
+      </ul>
+
+      <!-- Paginador (RF-005) -->
+      <mat-paginator
+        #oPaginatorMembros
+        *ngIf="nTotalMembros > 0"
+        [length]="nTotalMembros"
+        [pageSize]="nTamanhoPagina"
+        [pageSizeOptions]="[5, 10, 20]"
+        [pageIndex]="nPaginaAtual"
+        (page)="onPaginaMembrosChange($event)"
+        showFirstLastButtons
+        class="paginador">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</section>

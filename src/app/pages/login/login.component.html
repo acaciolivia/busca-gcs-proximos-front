@@ -1,0 +1,47 @@
+<div class="login-container">
+  <mat-card class="card-login">
+    <mat-card-header>
+      <div mat-card-avatar class="login-avatar">
+        <mat-icon>lock</mat-icon>
+      </div>
+      <mat-card-title>Área Restrita</mat-card-title>
+      <mat-card-subtitle>Informe a senha para acessar o gerenciamento</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="fLogin" (ngSubmit)="entrar()">
+        <mat-form-field appearance="outline" class="campo-senha">
+          <mat-label>Senha</mat-label>
+          <input matInput formControlName="sSenha"
+                 [type]="bMostrarSenha ? 'text' : 'password'"
+                 placeholder="Digite a senha de administração"
+                 autocomplete="current-password"
+                 (keyup.enter)="entrar()">
+          <button mat-icon-button matSuffix type="button"
+                  (click)="bMostrarSenha = !bMostrarSenha"
+                  [matTooltip]="bMostrarSenha ? 'Ocultar' : 'Mostrar'">
+            <mat-icon>{{ bMostrarSenha ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="fLogin.get('sSenha')?.hasError('required')">
+            Senha obrigatória
+          </mat-error>
+        </mat-form-field>
+
+        <div class="acoes-login">
+          <button mat-raised-button color="primary" type="submit"
+                  [disabled]="fLogin.invalid || bAutenticando" class="btn-entrar">
+            <mat-spinner diameter="18" *ngIf="bAutenticando" class="spinner-btn"></mat-spinner>
+            <mat-icon *ngIf="!bAutenticando">login</mat-icon>
+            Entrar
+          </button>
+        </div>
+
+        <p class="aviso-login">
+          <mat-icon>info</mat-icon>
+          Apenas pessoas autorizadas pela igreja têm acesso a esta área.
+          A sessão expira em 4 horas.
+        </p>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

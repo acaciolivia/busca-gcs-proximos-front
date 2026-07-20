@@ -1,5 +1,5 @@
 // =============================================================
-// EnderecosComponent — Estilos (tema verde escuro)
+// CadastroComponent — Estilos (tema verde escuro)
 // =============================================================
 
 // ── Variáveis ────────────────────────────────────────────────
@@ -10,7 +10,7 @@ $verde-fundo:   #f1f8e9;
 $verde-borda:   #c8e6c9;
 $texto-muted:   rgba(0, 0, 0, .5);
 
-// ── Cards compartilhados ─────────────────────────────────────
+// ── Card do formulário ───────────────────────────────────────
 .card-secao {
   margin-bottom: 24px;
   border-radius: 14px !important;
@@ -28,7 +28,7 @@ $texto-muted:   rgba(0, 0, 0, .5);
   color: $verde-escuro;
 }
 
-// ── Subtítulo de seção dentro do formulário ──────────────────
+// ── Subtítulo de seção no formulário ────────────────────────
 .form-secao-titulo {
   display: flex;
   align-items: center;
@@ -87,7 +87,7 @@ $texto-muted:   rgba(0, 0, 0, .5);
   margin-bottom: 24px;
 }
 
-// ── Barra de pesquisa proeminente ────────────────────────────
+// ── Barra de pesquisa ────────────────────────────────────────
 .barra-pesquisa {
   display: flex;
   align-items: center;
@@ -184,7 +184,6 @@ $texto-muted:   rgba(0, 0, 0, .5);
   }
 }
 
-// Topo do card
 .card-topo {
   display: flex;
   align-items: center;
@@ -222,7 +221,7 @@ $texto-muted:   rgba(0, 0, 0, .5);
   .btn-editar { color: $verde-escuro; }
 }
 
-// ── Membros dentro do card de endereço ───────────────────────
+// ── Membros dentro do card ───────────────────────────────────
 .card-membros {
   padding: 8px 14px 4px;
 }
@@ -246,7 +245,28 @@ $texto-muted:   rgba(0, 0, 0, .5);
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+
+  &.avatar-desigrejado { background: #c62828; }
 }
+
+.tag-desigrejado {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #ffebee;
+  color: #c62828;
+  border: 1px solid #c62828;
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+
+  mat-icon { font-size: 12px; width: 12px; height: 12px; }
+}
+
+.check-desigrejado { color: #c62828 !important; }
 
 .card-membro-dados {
   display: flex;
@@ -279,6 +299,16 @@ $texto-muted:   rgba(0, 0, 0, .5);
   white-space: nowrap;
   margin-left: auto;
   flex-shrink: 0;
+  text-decoration: none;
+  transition: color .15s;
+
+  &:hover { color: $verde-escuro; text-decoration: underline; }
+
+  &.tel-whatsapp {
+    color: #25d366;
+    font-weight: 600;
+    &:hover { color: #128c7e; }
+  }
 }
 
 .icone-tel-card {
@@ -287,14 +317,43 @@ $texto-muted:   rgba(0, 0, 0, .5);
   height: 13px;
 }
 
-// Divisor verde
+.card-membro-sem-contato {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  color: #c62828;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+}
+
+// Linha de checkboxes (WhatsApp + Aceita contato)
+.form-checkboxes {
+  gap: 24px;
+  margin: -8px 0 16px 4px;
+
+  .check-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .check-icone {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $texto-muted;
+  }
+
+  .check-wpp { color: #25d366; }
+}
+
 .card-divisor {
   height: 3px;
   background: linear-gradient(90deg, $verde-escuro, $verde-claro);
   margin: 0 0 4px;
 }
 
-// Corpo do card
 .card-corpo {
   padding: 10px 14px 14px;
 }
@@ -369,10 +428,7 @@ $texto-muted:   rgba(0, 0, 0, .5);
     margin: 0 auto 12px;
   }
 
-  p {
-    margin: 0 0 16px;
-    font-size: 14px;
-  }
+  p { margin: 0 0 16px; font-size: 14px; }
 }
 
 // ── Loading ──────────────────────────────────────────────────
@@ -381,123 +437,11 @@ $texto-muted:   rgba(0, 0, 0, .5);
   flex-direction: column;
   align-items: center;
   padding: 48px 0;
-}
 
-// ── Seção Proximidade ────────────────────────────────────────
-.proximidade-controles {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.campo-cep-prox {
-  flex: 0 0 190px;
-
-  .mat-mdc-form-field-subscript-wrapper { display: none; }
-}
-
-// Grupo de botões de raio
-.filtro-raio {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: $verde-fundo;
-  border: 1px solid $verde-borda;
-  border-radius: 50px;
-  padding: 4px 8px;
-  height: 56px;
-  box-sizing: border-box;
-}
-
-.filtro-raio-label {
-  font-size: 13px;
-  color: $texto-muted;
-  margin-right: 4px;
-  white-space: nowrap;
-}
-
-.btn-raio-ativo {
-  border-radius: 50px !important;
-  font-size: 13px;
-}
-
-.btn-raio-inativo {
-  border-radius: 50px !important;
-  font-size: 13px;
-  background: transparent !important;
-  color: $verde-escuro !important;
-
-  &:hover { background: $verde-claro !important; }
-}
-
-.btn-buscar-prox {
-  height: 56px;
-  padding: 0 24px;
-  border-radius: 8px;
-}
-
-// ── Info resultado de proximidade ────────────────────────────
-.resultado-info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: $texto-muted;
-  font-size: 13px;
-  margin-bottom: 16px;
-
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: $verde-escuro;
-  }
-}
-
-// ── Card de proximidade ──────────────────────────────────────
-.card-proximo .card-topo {
-  justify-content: flex-start;
-  gap: 6px;
-}
-
-.badge-posicao {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: $verde-fundo;
-  color: $verde-escuro;
-  font-weight: 700;
-  font-size: 12px;
-  border: 1px solid $verde-borda;
-  flex-shrink: 0;
-
-  &.posicao-top {
-    background: $verde-escuro;
-    color: #fff;
-    border-color: $verde-escuro;
-  }
-}
-
-.badge-distancia {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  background: $verde-escuro;
-  color: #fff;
-  border-radius: 20px;
-  padding: 3px 10px 3px 6px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: auto;
-
-  mat-icon {
+  .text-muted {
+    margin-top: 16px;
+    color: $texto-muted;
     font-size: 14px;
-    width: 14px;
-    height: 14px;
   }
 }
 
@@ -511,8 +455,4 @@ $texto-muted:   rgba(0, 0, 0, .5);
 
   .form-acoes { justify-content: stretch; button { flex: 1; } }
   .enderecos-grid { grid-template-columns: 1fr; }
-  .proximidade-controles { flex-direction: column; }
-  .campo-cep-prox { flex: 1 1 100%; }
-  .filtro-raio { width: 100%; justify-content: center; }
-  .btn-buscar-prox { width: 100%; }
 }

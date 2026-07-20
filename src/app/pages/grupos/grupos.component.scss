@@ -1,0 +1,334 @@
+// ============================================================
+// GruposComponent — Estilos
+// ============================================================
+$verde-escuro:  #2e7d32;
+$verde-medio:   #388e3c;
+$verde-claro:   #a5d6a7;
+$verde-fundo:   #f1f8e9;
+$verde-borda:   #c8e6c9;
+$laranja:       #ef6c00;
+$vermelho:      #c62828;
+$vermelho-fundo:#ffebee;
+$texto-muted:   rgba(0,0,0,.5);
+
+// ── Card de seção (form / detalhes) ───────────────────────
+.card-secao {
+  margin-bottom: 24px;
+  border-radius: 14px !important;
+  border: 1px solid $verde-borda !important;
+  box-shadow: 0 2px 10px rgba(46,125,50,.1) !important;
+  background: #fff !important;
+}
+
+.titulo-icone {
+  vertical-align: middle;
+  margin-right: 8px;
+  color: $verde-escuro;
+}
+
+// ── Formulário ───────────────────────────────────────────
+.form-linha {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+
+  > mat-form-field { flex: 1 1 240px; }
+}
+
+.campo-nome-grupo  { flex: 2 1 320px !important; }
+.campo-lider       { flex: 1 1 240px !important; }
+.campo-descricao   { flex: 1 1 100% !important; }
+
+.form-acoes {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+
+  button mat-icon { vertical-align: middle; margin-right: 4px; }
+}
+
+.spinner-btn { display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+// ── Seção lista de grupos ───────────────────────────────
+.secao-lista { margin-bottom: 24px; }
+
+.lista-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.lista-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: $verde-escuro;
+  margin: 0;
+
+  mat-icon { color: $verde-escuro; }
+}
+
+.badge-contagem {
+  background: $verde-escuro;
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.grupos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.grupo-card {
+  background: #fff;
+  border: 1px solid $verde-borda;
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 8px rgba(46,125,50,.08);
+  transition: box-shadow .2s, transform .15s, border-color .2s;
+  display: flex;
+  flex-direction: column;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(46,125,50,.18);
+    transform: translateY(-2px);
+  }
+
+  &.card-selecionado {
+    border-color: $verde-escuro;
+    box-shadow: 0 6px 22px rgba(46,125,50,.28);
+  }
+}
+
+.grupo-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.grupo-nome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: $verde-escuro;
+  margin: 0;
+  flex: 1;
+}
+
+.ico-grupo { color: $verde-escuro; }
+
+.grupo-lider {
+  font-size: 13px;
+  color: rgba(0,0,0,.75);
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: $verde-medio; }
+}
+
+.grupo-descricao {
+  font-size: 12px;
+  color: $texto-muted;
+  margin: 6px 0 8px;
+  line-height: 1.4;
+}
+
+.grupo-rodape {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.badge-membros {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: $verde-fundo;
+  color: $verde-escuro;
+  border: 1px solid $verde-borda;
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+}
+
+// ── Detalhes do grupo ───────────────────────────────────
+.card-detalhes-grupo {
+  background: $verde-fundo !important;
+}
+
+.add-membro-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  align-items: flex-start;
+
+  .campo-add-membro { flex: 1 1 280px; }
+
+  button { height: 56px; padding: 0 18px; border-radius: 8px; }
+}
+
+.lista-membros-grupo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid $verde-borda;
+  overflow: hidden;
+}
+
+.membro-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid $verde-borda;
+
+  &:last-child { border-bottom: none; }
+}
+
+.membro-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: $verde-escuro;
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  &.avatar-visitante { background: $laranja; }
+  &.avatar-desigrejado { background: $vermelho; }
+}
+
+.membro-dados {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.membro-nome {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0,0,0,.85);
+}
+
+.membro-funcao {
+  font-size: 11px;
+  color: $verde-escuro;
+}
+
+.membro-telefone {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: $texto-muted;
+  white-space: nowrap;
+  text-decoration: none;
+
+  &:hover { color: $verde-escuro; text-decoration: underline; }
+
+  &.tel-whatsapp {
+    color: #25d366;
+    font-weight: 600;
+    &:hover { color: #128c7e; }
+  }
+
+  .ico-tel { font-size: 14px; width: 14px; height: 14px; }
+}
+
+.tag-desigrejado {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: $vermelho-fundo;
+  color: $vermelho;
+  border: 1px solid $vermelho;
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+
+  mat-icon { font-size: 12px; width: 12px; height: 12px; }
+}
+
+.sem-membros {
+  text-align: center;
+  padding: 24px 16px;
+  color: $texto-muted;
+  background: #fff;
+  border: 1px dashed $verde-borda;
+  border-radius: 10px;
+
+  mat-icon {
+    font-size: 36px; width: 36px; height: 36px;
+    color: $verde-claro;
+    display: block;
+    margin: 0 auto 8px;
+  }
+
+  p { margin: 0; font-size: 13px; }
+}
+
+.sem-resultados {
+  text-align: center;
+  padding: 32px 16px;
+  color: $texto-muted;
+  background: #fff;
+  border: 1px dashed $verde-borda;
+  border-radius: 12px;
+
+  mat-icon {
+    font-size: 40px; width: 40px; height: 40px;
+    color: $verde-claro;
+    display: block;
+    margin: 0 auto 8px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 0;
+
+  .text-muted { margin-top: 12px; color: $texto-muted; font-size: 14px; }
+}
+
+.paginador {
+  border: 1px solid $verde-borda;
+  border-radius: 10px;
+  background: #fff;
+  margin-top: 12px;
+}
+
+// ── Responsividade ──────────────────────────────────────
+@media (max-width: 768px) {
+  .grupos-grid { grid-template-columns: 1fr; }
+  .form-linha > mat-form-field { flex: 1 1 100%; }
+  .add-membro-bar button { width: 100%; height: 44px; }
+}

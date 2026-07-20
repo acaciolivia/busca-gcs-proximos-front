@@ -4,17 +4,36 @@
   <span class="toolbar-titulo">IPF nos Lares</span>
   <span class="toolbar-subtitulo">Sistema de Gerenciamento de Endereços</span>
   <span class="toolbar-spacer"></span>
+
+  <!-- Navegação -->
+  <nav class="toolbar-nav">
+    <a mat-button routerLink="/" routerLinkActive="nav-ativo"
+       [routerLinkActiveOptions]="{ exact: true }">
+      <mat-icon>home</mat-icon> Listagem
+    </a>
+    <a mat-button routerLink="/cadastro" routerLinkActive="nav-ativo">
+      <mat-icon>add_location_alt</mat-icon> Cadastro
+    </a>
+    <a mat-button routerLink="/grupos" routerLinkActive="nav-ativo">
+      <mat-icon>groups</mat-icon> Grupos
+    </a>
+    <button mat-button class="btn-sair" *ngIf="bAutenticado" (click)="sair()"
+            matTooltip="Encerrar sessao administrativa">
+      <mat-icon>logout</mat-icon> Sair
+    </button>
+  </nav>
+
   <span class="toolbar-versao">v1.0</span>
 </mat-toolbar>
 
 <!-- ── Conteúdo principal ──────────────────────────────────── -->
 <main class="conteudo-principal">
-  <app-enderecos></app-enderecos>
+  <router-outlet></router-outlet>
 </main>
 
 <!-- ── Rodapé ─────────────────────────────────────────────── -->
 <footer class="rodape">
   <span>IPF nos Lares &copy; {{ sAnoAtual }}</span>
   <mat-divider [vertical]="true" class="rodape-divider"></mat-divider>
-  <span>Back-end: Spring Boot &nbsp;|&nbsp; Banco: PostgreSQL &nbsp;|&nbsp; Front-end: Angular</span>
+  <span>Back-end: Spring Boot &nbsp;|&nbsp; Banco: MySQL &nbsp;|&nbsp; Front-end: Angular</span>
 </footer>

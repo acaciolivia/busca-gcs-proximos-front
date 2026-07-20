@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  sApiUrl: 'http://localhost:8080/api'
+  // Quando o Angular estiver EMBUTIDO no Spring Boot (mesmo servidor),
+  // usa URL relativa — sem CORS, sem configuração extra.
+  sApiUrl: '/api'
 };

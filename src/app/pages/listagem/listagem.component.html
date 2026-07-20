@@ -1,0 +1,314 @@
+<!-- =====================================================
+     IPF nos Lares — Listagem unificada (busca + filtros)
+     ===================================================== -->
+
+<!-- ── Barra de pesquisa ────────────────────────────────── -->
+<div class="barra-pesquisa">
+  <mat-icon class="pesquisa-icone">search</mat-icon>
+  <input class="pesquisa-input"
+         type="text"
+         placeholder="Pesquisar por nome, CEP, logradouro, bairro, cidade ou estado..."
+         [value]="sBuscaTexto"
+         (input)="onFiltroInput($event)">
+  <button class="pesquisa-limpar" *ngIf="sBuscaTexto" (click)="limparBusca()"
+          mat-icon-button matTooltip="Limpar pesquisa">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<!-- ── Linha de filtros ─────────────────────────────────── -->
+<div class="filtros-bar">
+
+  <!-- Filtro por TIPO -->
+  <div class="filtro-grupo">
+    <span class="filtro-grupo-label">
+      <mat-icon class="filtro-icone">groups</mat-icon> Tipo:
+    </span>
+    <button mat-flat-button
+            [color]="sTipoFiltro === 'todos' ? 'primary' : undefined"
+            [class.btn-chip-ativo]="sTipoFiltro === 'todos'"
+            [class.btn-chip-inativo]="sTipoFiltro !== 'todos'"
+            (click)="selecionarTipo('todos')">Todos</button>
+    <button mat-flat-button
+            [color]="sTipoFiltro === 'membros' ? 'primary' : undefined"
+            [class.btn-chip-ativo]="sTipoFiltro === 'membros'"
+            [class.btn-chip-inativo]="sTipoFiltro !== 'membros'"
+            (click)="selecionarTipo('membros')">Membros</button>
+    <button mat-flat-button
+            [color]="sTipoFiltro === 'visitantes' ? 'primary' : undefined"
+            [class.btn-chip-ativo]="sTipoFiltro === 'visitantes'"
+            [class.btn-chip-inativo]="sTipoFiltro !== 'visitantes'"
+            (click)="selecionarTipo('visitantes')">Visitantes</button>
+    <button mat-flat-button
+            [color]="sTipoFiltro === 'desigrejados' ? 'warn' : undefined"
+            [class.btn-chip-ativo-warn]="sTipoFiltro === 'desigrejados'"
+            [class.btn-chip-inativo]="sTipoFiltro !== 'desigrejados'"
+            (click)="selecionarTipo('desigrejados')">Desigrejados</button>
+  </div>
+
+  <!-- Filtro por PROXIMIDADE -->
+  <div class="filtro-grupo filtro-proximidade">
+    <mat-form-field appearance="outline" class="campo-cep-prox">
+      <mat-label>CEP de referência</mat-label>
+      <input matInput
+             [value]="sCepProximidade"
+             (input)="onCepProximidadeInput($event)"
+             placeholder="00000-000" maxlength="9"
+             (keyup.enter)="buscarProximos()">
+      <mat-icon matSuffix>my_location</mat-icon>
+    </mat-form-field>
+
+    <span class="filtro-grupo-label">
+      <mat-icon class="filtro-icone">near_me</mat-icon> Raio:
+    </span>
+    <button mat-flat-button
+            [color]="nRaioFiltroKm === 0 ? 'primary' : undefined"
+            [class.btn-chip-ativo]="nRaioFiltroKm === 0"
+            [class.btn-chip-inativo]="nRaioFiltroKm !== 0"
+            (click)="selecionarRaio(0)">Todos</button>
+    <button mat-flat-button
+            [color]="nRaioFiltroKm === 1 ? 'primary' : undefined"
+            [class.btn-chip-ativo]="nRaioFiltroKm === 1"
+            [class.btn-chip-inativo]="nRaioFiltroKm !== 1"
+            (click)="selecionarRaio(1)"
+            [disabled]="bBuscandoProximos">1 km</button>
+    <button mat-flat-button
+            [color]="nRaioFiltroKm === 3 ? 'primary' : undefined"
+            [class.btn-chip-ativo]="nRaioFiltroKm === 3"
+            [class.btn-chip-inativo]="nRaioFiltroKm !== 3"
+            (click)="selecionarRaio(3)"
+            [disabled]="bBuscandoProximos">3 km</button>
+
+    <mat-spinner diameter="20" *ngIf="bBuscandoProximos" class="spinner-prox"></mat-spinner>
+  </div>
+
+</div>
+
+<!-- ── Seção: Resultados ────────────────────────────────── -->
+<section class="secao-lista">
+
+  <div class="lista-header">
+    <h2 class="lista-titulo">
+      <mat-icon>home</mat-icon>
+      Cadastros
+      <span class="badge-contagem">{{ nTotalItens }}</span>
+    </h2>
+    <span class="lista-pagina-info" *ngIf="nTotalItens > 0">
+      <span *ngIf="bExibeDistancia" class="info-raio">
+        <mat-icon>place</mat-icon> em até {{ nRaioFiltroKm }} km ·
+      </span>
+      Exibindo {{ lEnderecosPagina.length }} de {{ nTotalItens }}
+    </span>
+  </div>
+
+  <!-- Loading inicial -->
+  <div class="loading-container" *ngIf="bCarregando">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p class="text-muted">Carregando...</p>
+  </div>
+
+  <!-- Sem resultados -->
+  <div class="sem-resultados" *ngIf="!bCarregando && !bBuscandoProximos && nTotalItens === 0">
+    <mat-icon>search_off</mat-icon>
+    <p>
+      <span *ngIf="sBuscaTexto">Nenhum resultado para "{{ sBuscaTexto }}"</span>
+      <span *ngIf="!sBuscaTexto && bExibeDistancia">Nenhum endereço encontrado em até {{ nRaioFiltroKm }} km.</span>
+      <span *ngIf="!sBuscaTexto && !bExibeDistancia">Nenhum cadastro corresponde aos filtros aplicados.</span>
+    </p>
+    <button mat-stroked-button color="primary" *ngIf="sBuscaTexto" (click)="limparBusca()">
+      Limpar pesquisa
+    </button>
+  </div>
+
+  <!-- Grid de cards -->
+  <div class="enderecos-grid" *ngIf="!bCarregando && lEnderecosPagina.length > 0">
+    <div class="endereco-card"
+         *ngFor="let oEndereco of lEnderecosPagina"
+         [class.card-expandido]="estaExpandido(oEndereco.nId)"
+         (click)="alternarExpansao(oEndereco.nId)"
+         [matTooltip]="estaExpandido(oEndereco.nId) ? 'Recolher detalhes' : 'Clique para ver detalhes'"
+         matTooltipPosition="above">
+
+      <!-- Topo do card -->
+      <div class="card-topo">
+        <span class="badge-cep">
+          <mat-icon class="icone-cep">location_on</mat-icon>
+          {{ oEndereco.sCep }}
+        </span>
+        <span class="badge-distancia" *ngIf="bExibeDistancia && oEndereco.dDistanciaKm !== undefined">
+          <mat-icon>straighten</mat-icon>
+          {{ oEndereco.dDistanciaKm | number:'1.1-1' }} km
+        </span>
+        <mat-icon class="card-expand-icon">
+          {{ estaExpandido(oEndereco.nId) ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </div>
+
+      <!-- Membros -->
+      <div class="card-membros" *ngIf="oEndereco.lMembros && oEndereco.lMembros.length > 0">
+        <div class="card-membro-item" *ngFor="let oM of oEndereco.lMembros">
+          <div class="card-membro-avatar"
+               [class.avatar-visitante]="oM.sFuncao === 'Visitante'"
+               [class.avatar-desigrejado]="oM.bDesigrejado">
+            {{ (oM.sNome || '?').charAt(0).toUpperCase() }}
+          </div>
+          <div class="card-membro-dados">
+            <span class="card-membro-nome">
+              {{ oM.sNome }}
+              <span class="tag-desigrejado" *ngIf="oM.bDesigrejado"
+                    matTooltip="Membro desigrejado (afastado da igreja)">
+                <mat-icon>heart_broken</mat-icon> Desigrejado
+              </span>
+            </span>
+            <span class="card-membro-funcao"
+                  [class.funcao-visitante]="oM.sFuncao === 'Visitante'">
+              {{ oM.sFuncao }}
+            </span>
+          </div>
+          <a class="card-membro-telefone"
+             *ngIf="oM.sTelefone"
+             [class.tel-whatsapp]="oM.bWhatsapp"
+             [href]="gerarLinkContato(oM.sTelefone, oM.bWhatsapp)"
+             target="_blank" rel="noopener"
+             (click)="$event.stopPropagation()"
+             [matTooltip]="oM.bWhatsapp ? 'Abrir no WhatsApp' : 'Ligar'">
+            <mat-icon class="icone-tel-card">{{ oM.bWhatsapp ? 'chat' : 'phone' }}</mat-icon>
+            {{ formatarTelefone(oM.sTelefone) }}
+          </a>
+          <span class="card-membro-sem-contato"
+                *ngIf="oM.bAceitaContato === false"
+                matTooltip="A pessoa não autorizou ser contactada">
+            <mat-icon>do_not_disturb_on</mat-icon>
+          </span>
+        </div>
+      </div>
+
+      <div class="card-divisor"></div>
+
+      <!-- Corpo do card -->
+      <div class="card-corpo">
+        <p class="card-logradouro">
+          {{ oEndereco.sLogradouro || 'Logradouro não informado' }}
+          <span *ngIf="oEndereco.sNumero">, {{ oEndereco.sNumero }}</span>
+        </p>
+        <p class="card-complemento" *ngIf="oEndereco.sComplemento">
+          {{ oEndereco.sComplemento }}
+        </p>
+        <p class="card-localidade">
+          <mat-icon class="icone-localidade">place</mat-icon>
+          {{ oEndereco.sBairro ? oEndereco.sBairro + ' · ' : '' }}{{ oEndereco.sCidade || '—' }}
+          <span class="badge-uf" *ngIf="oEndereco.sEstado">{{ oEndereco.sEstado }}</span>
+        </p>
+        <p class="card-sem-coords" *ngIf="!oEndereco.dLatitude"
+           matTooltip="Sem coordenadas geocodificadas">
+          <mat-icon>location_searching</mat-icon> Sem coordenadas
+        </p>
+      </div>
+
+      <!-- ── Detalhes expandidos (RF-001) ──────────────── -->
+      <div class="card-detalhes" *ngIf="estaExpandido(oEndereco.nId)">
+        <div class="detalhes-divisor"></div>
+
+        <h4 class="detalhes-titulo">
+          <mat-icon>info</mat-icon> Detalhes do cadastro
+        </h4>
+
+        <!-- Endereço completo -->
+        <div class="detalhe-bloco">
+          <div class="detalhe-bloco-titulo">
+            <mat-icon>home</mat-icon> Endereço
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">CEP:</span>
+            <span class="detalhe-valor">{{ oEndereco.sCep || '—' }}</span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Logradouro:</span>
+            <span class="detalhe-valor">{{ oEndereco.sLogradouro || '—' }}</span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Número:</span>
+            <span class="detalhe-valor">{{ oEndereco.sNumero || '—' }}</span>
+          </div>
+          <div class="detalhe-linha" *ngIf="oEndereco.sComplemento">
+            <span class="detalhe-label">Complemento:</span>
+            <span class="detalhe-valor">{{ oEndereco.sComplemento }}</span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Bairro:</span>
+            <span class="detalhe-valor">{{ oEndereco.sBairro || '—' }}</span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Cidade/UF:</span>
+            <span class="detalhe-valor">
+              {{ oEndereco.sCidade || '—' }}{{ oEndereco.sEstado ? ' / ' + oEndereco.sEstado : '' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Pessoas vinculadas -->
+        <div class="detalhe-bloco" *ngFor="let oM of oEndereco.lMembros">
+          <div class="detalhe-bloco-titulo">
+            <mat-icon>person</mat-icon> {{ oM.sNome }}
+            <span class="tag-desigrejado-mini" *ngIf="oM.bDesigrejado">
+              <mat-icon>heart_broken</mat-icon> Desigrejado
+            </span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Função:</span>
+            <span class="detalhe-valor">{{ oM.sFuncao || '—' }}</span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Telefone:</span>
+            <span class="detalhe-valor">
+              {{ oM.sTelefone ? formatarTelefone(oM.sTelefone) : '—' }}
+              <span class="detalhe-tag-wpp" *ngIf="oM.sTelefone && oM.bWhatsapp">
+                <mat-icon>chat</mat-icon> WhatsApp
+              </span>
+            </span>
+          </div>
+          <div class="detalhe-linha">
+            <span class="detalhe-label">Aceita contato:</span>
+            <span class="detalhe-valor">
+              <mat-icon class="ico-bool"
+                        [class.ico-true]="oM.bAceitaContato"
+                        [class.ico-false]="!oM.bAceitaContato">
+                {{ oM.bAceitaContato ? 'check_circle' : 'cancel' }}
+              </mat-icon>
+              {{ oM.bAceitaContato ? 'Sim' : 'Não' }}
+            </span>
+          </div>
+          <!-- Grupo/Célula (RF-001 completo) -->
+          <div class="detalhe-linha detalhe-grupo">
+            <span class="detalhe-label">Grupo/Célula:</span>
+            <span class="detalhe-valor" *ngIf="oM.sNomeGrupo; else semGrupo">
+              <mat-icon class="ico-grupo-detalhe">groups</mat-icon>
+              <strong>{{ oM.sNomeGrupo }}</strong>
+              <span class="lider-info" *ngIf="oM.sNomeLiderGrupo">
+                · Líder: {{ oM.sNomeLiderGrupo }}
+              </span>
+            </span>
+            <ng-template #semGrupo>
+              <span class="detalhe-valor text-muted">Sem grupo vinculado</span>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Paginador -->
+  <mat-paginator
+    #oPaginator
+    *ngIf="nTotalItens > 0"
+    [length]="nTotalItens"
+    [pageSize]="nTamanhoPagina"
+    [pageSizeOptions]="[15, 30, 50]"
+    [pageIndex]="nPaginaAtual"
+    (page)="onPaginaChange($event)"
+    showFirstLastButtons
+    class="paginador">
+  </mat-paginator>
+
+</section>
